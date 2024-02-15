@@ -13,7 +13,7 @@ const app = express();
 const PORT = 8080;
 
 // Connecting to the MongoDB database
-const dbURI = "mongodb://127.0.0.1:27017/buzzmart";
+const dbURI = "";
 mongoose
   .connect(dbURI)
   .then((result) => {

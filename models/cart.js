@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const productSchema = require("./product").schema;
+const userSchema = require("./user").schema;
 
 const cartItemSchema = new mongoose.Schema({
   product: productSchema,
@@ -15,14 +16,15 @@ const cartItemSchema = new mongoose.Schema({
 });
 
 const shoppingCartSchema = new mongoose.Schema({
+  user: userSchema,
   items: [cartItemSchema],
   total: {
     type: Number,
-    reqquired: true,
+    required: true,
     default: 0,
   },
 });
 
 const Cart = mongoose.model("ShoppingCart", shoppingCartSchema);
-
-module.exports = Cart;
+const cartItem = mongoose.model("CartItem", cartItemSchema)
+module.exports = {Cart, cartItem};
