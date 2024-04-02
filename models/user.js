@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
+const crypto = require("crypto");
 const { Cart } = require("./cart");
-const userSchema = new mongoose.Schema(
+const Schema = mongoose.Schema;
+
+const userSchema = new Schema(
   {
     username: {
       type: String,
@@ -12,6 +15,14 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    hash: {
+      type: String,
+      required: true,
+    },
+    salt: {
+      type: String,
+      required: true,
+    },
     role: {
       type: String,
       enum: ["user", "admin"],
@@ -21,35 +32,24 @@ const userSchema = new mongoose.Schema(
       type: String,
     },
     orderHistory: [],
-    shoppingCart: Cart,
-    password: {
-      type: String,
-      required: true,
-    },
+    shoppingCart: Cart.schema,
   },
   { timestamps: true }
 );
 
+userSchema.methods.setPassword = (password) => {
+  this.salt = crypto.randomBytes(16).toString("hex");
+  this.hash = crypto
+    .pbkdf2Sync(password, this.salt, 1000, 64, "sha512")
+    .toString("hex");
+};
 
-/* // Hash the Password before saving it.
-userSchema.pre("save", async function (next) {
-  const user = this;
-  if (!user.isModified("password")) return next();
-
-  try {
-    const salt = await bcrypt.genSalt();
-    user.password = await bcrypt.hash(user.password, salt);
-    next();
-  } catch (error) {
-    return next(error);
-  }
-
-  //Compare the given password with the hashed password in the database
-  userSchema.methods.comparePassword = async (password) => {
-    return bcrypt.compare(password, this.password);
-  };
-}); */
+userSchema.methods.validPassword = (password) => {
+  const hash = crypto
+    .pbkdf2Sync(password, this.salt, 1000, 64, "sha512")
+    .toString("hex");
+  return this.hash === hash;
+};
 
 const User = mongoose.model("User", userSchema);
-
 module.exports = User;

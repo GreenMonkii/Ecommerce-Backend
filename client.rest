@@ -1,8 +1,10 @@
-PATCH http://localhost:8080/products/65c571ed62589af75004982c HTTP/1.1
+POST http://localhost:8080/users/signup HTTP/1.1
 User-Agent: rest-client
 Accept-Language: en-GB,en-US;q=0.8,en;q=0.6,zh-CN;q=0.4
 Content-Type: application/json
 
 {
-    "Featured": "true"
+    "username": "Harry",
+    "email": "abramsharry6@gmail.com",
+    "password": "$trongP@$$word" 
 }

@@ -4,16 +4,19 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
 const logger = require("morgan");
+const session = require("express-session")
 
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 const productRouter = require("./routes/product");
+const requireAuth = require("./middleware/auth")
 
+require('dotenv').config()
 const app = express();
 const PORT = 8080;
 
 // Connecting to the MongoDB database
-const dbURI = "";
+const dbURI = process.env.MONGODB_URI;
 mongoose
   .connect(dbURI)
   .then((result) => {
@@ -34,6 +37,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+app.use(session({
+  secret: process.env.SECRET_KEY,
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: true }
+}))
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
