@@ -1,14 +1,15 @@
 const User = require("../models/user");
 
 const loginUser = (req, res) => {
-  User.findOne({ email: req.body.email }, (err, user) => {
+  User.findOne({ email: req.body.email })
+  .then((user) => {
     if (user === null) {
       return res.status(400).send({
         message: "User not found.",
       });
     } else {
       if (user.validPassword(req.body.password)) {
-        req.session.userId = user._id;
+        req.session.userId = user._id.toString();
         return res.status(201).send({
           message: "User Logged In",
         });
@@ -35,6 +36,7 @@ const createUser = (req, res, next) => {
       res.json({ message: "User Created Successfully" });
     })
     .catch((err) => {
+      console.log(err);
       return res
         .status(400)
         .send({ message: "An error occured while creating a User!" });
@@ -49,5 +51,5 @@ const addOrderHistory = (req, res, next) => {
 module.exports = {
   loginUser,
   createUser,
-  addOrderHistory
-}
+  addOrderHistory,
+};

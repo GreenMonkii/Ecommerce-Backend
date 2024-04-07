@@ -19,11 +19,6 @@ This project is a flexible backend for an Ecommerce project created using techno
 
 ## Getting Started
 
-**Prerequisites:**
-
-* Ensure that you have working installations of Python and Visual Studio on your machine.
-* Download [https://python.org/downloads]{the latest version of Python}.
-
 **Running the Project:**
 
 * Clone this project to have a local copy on your machine.

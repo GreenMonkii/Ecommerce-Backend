@@ -5,14 +5,11 @@ const listProducts = (req, res, next) => {
   const search = queryParams["search"] || "";
   const sortBy = queryParams["sortBy"] || "createdAt";
   // const filter = JSON.parse(queryParams["filter"]) || {prop: "", value: ""}
-  const page = Number.parseInt(queryParams["page"]) || 1;
+  const page = Number.parseInt(queryParams["page"]) - 1 || 0;
   const perPage = Number.parseInt(queryParams["perPage"]) || 5;
   console.log(queryParams);
   // Searching through the API Response
-  Product.find({ Description: new RegExp(`.*${search}.*`) })
-    // Filtering the API Response
-    // .where(filter.props).equals(filter.value)
-    // Sorting the API Response
+  Product.find()
     .sort(sortBy)
     .limit(perPage)
     .skip(page * perPage)

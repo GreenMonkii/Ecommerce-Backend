@@ -4,14 +4,15 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
 const logger = require("morgan");
-const session = require("express-session")
+const session = require("express-session");
+const cors = require("cors");
 
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 const productRouter = require("./routes/product");
-const requireAuth = require("./middleware/auth")
+const requireAuth = require("./middleware/auth");
 
-require('dotenv').config()
+require("dotenv").config();
 const app = express();
 const PORT = 8080;
 
@@ -37,16 +38,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
-app.use(session({
-  secret: process.env.SECRET_KEY,
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: true }
-}))
+app.use(
+  session({
+    secret: process.env.SECRET_KEY,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false, maxAge: 86400000 },
+  })
+);
+app.use(cors());
 
-app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/products", productRouter);
+app.use("/", indexRouter, requireAuth);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
