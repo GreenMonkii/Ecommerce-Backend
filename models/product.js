@@ -1,8 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-// Create the Product Schema
-// It consists of the following properties: Name, Price, Description, Image, Retailer, Category, Featured.
 const productSchema = new Schema(
   {
     Name: {
@@ -18,7 +16,7 @@ const productSchema = new Schema(
       required: true,
     },
     Image: {
-      type: String,
+      type: [String],
       required: true,
     },
     Retailer: {
@@ -33,6 +31,11 @@ const productSchema = new Schema(
     Stock: {
       type: Number,
       required: true,
+      default: 1
+    },
+    Ratings: {
+      type: [Number],
+      required: false
     },
     Keywords: [String]
   },

@@ -3,7 +3,7 @@ const Cart = require("../models/cart");
 async function getCart(req, res, next) {
   let cart;
   try {
-    cart = await User.findById(req.session.userId).shoppingCart;
+    cart = await Cart.findById(req.session.userId).shoppingCart;
     if (cart == null) {
       return res.status(404).json({ message: "Cannot find Cart" });
     }

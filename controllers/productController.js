@@ -8,8 +8,10 @@ const listProducts = (req, res, next) => {
   const page = Number.parseInt(queryParams["page"]) - 1 || 0;
   const perPage = Number.parseInt(queryParams["perPage"]) || 5;
   console.log(queryParams);
+  const escapedSearch = search.replace(/[.*+?${}()|[\]\\]/g, "\\$&");
+  const regex = new RegExp(escapedSearch, "i");
   // Searching through the API Response
-  Product.find()
+  Product.find({ Name: regex })
     .sort(sortBy)
     .limit(perPage)
     .skip(page * perPage)

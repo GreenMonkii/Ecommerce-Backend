@@ -8,7 +8,9 @@ async function getProduct(req, res, next) {
       return res.status(404).json({ message: "Cannot find Product" });
     }
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    return res
+      .status(500)
+      .json({ message: "The server responded to your request with an error" });
   }
   res.product = product;
   next();
