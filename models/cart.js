@@ -1,26 +1,21 @@
 const mongoose = require("mongoose");
-const productSchema = require("./product").schema;
 
 const cartItemSchema = new mongoose.Schema({
-  product: productSchema,
+  product: {
+    type: mongoose.Types.ObjectId,
+    ref: "Product",
+    required: true,
+  },
   quantity: {
     type: Number,
     required: true,
     default: 1,
-  },
-  price: {
-    type: Number,
-    required: true,
+    min: [1, "Quantity cannot be less than 1"],
   },
 });
 
 const shoppingCartSchema = new mongoose.Schema({
   items: [cartItemSchema],
-  total: {
-    type: Number,
-    required: true,
-    default: 0,
-  },
 });
 
 const Cart = mongoose.model("ShoppingCart", shoppingCartSchema);

@@ -1,13 +1,25 @@
-const { cartItem } = require("../models/cart");
+const { Cart } = require("../models/cart");
+const User = require("../models/user");
+const Product = require("../models/product");
 
-const getCartItems = (req, res, next) => {
+const getCartItems = (_req, res, _next) => {
   res.json(res.cart);
 };
 
-const addItemToCart = (req, res, next) => {
+const addItemToCart = async (req, res, _next) => {
   try {
-    const product = new cartItem(req.body);
-    res.cart.items.push(product);
+    const cartItem = req.body;
+    if (!cartItem.product || !cartItem.quantity) {
+      throw new Error("Product and quantity are required");
+    }
+    const product = await Product.findById(cartItem.product);
+    if (!product) {
+      throw new Error("Product does not exist");
+    }
+    const user = await User.findById(req.session.userId);
+    const userCart = await Cart.findById(user.shoppingCart);
+    userCart.items.push(cartItem);
+    await userCart.save();
     res
       .status(201)
       .json({ message: "Item has been successfully added to cart" });
@@ -16,11 +28,13 @@ const addItemToCart = (req, res, next) => {
   }
 };
 
-const removeItemFromCart = (req, res, next) => {
+const removeItemFromCart = async (req, res, _next) => {
   try {
-    const productId = req.body.productId;
-    res.cart.items = res.cart.items.filter(
-      (product) => product._id !== productId
+    const cartItemID = req.body.cartItemID;
+    const user = await User.findById(req.session.userId);
+    const userCart = await Cart.findById(user.shoppingCart);
+    userCart.items = userCart.items.filter(
+      (cartItem) => cartItem._id !== cartItemID
     );
     res
       .status(201)

@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const crypto = require("crypto");
-const { Cart } = require("./cart");
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema(
@@ -32,7 +31,10 @@ const userSchema = new Schema(
       type: String,
     },
     orderHistory: [],
-    shoppingCart: Cart.schema,
+    shoppingCart: {
+      type: Schema.Types.ObjectId,
+      ref: "Cart",
+    },
   },
   { timestamps: true }
 );
@@ -51,7 +53,7 @@ userSchema.methods.validPassword = function (password) {
       .toString("hex");
     return this.hash === hash;
   } catch (err) {
-    console.error(err);
+    throw new Error("Invalid Password");
   }
 };
 

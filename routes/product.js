@@ -16,4 +16,7 @@ router.patch("/:productId", requireAuth, productController.editProduct);
 // PUT (replace) a product
 router.put("/:productId", requireAuth, productController.replaceProduct);
 
+// DELETE a product
+router.delete("/:productId", requireAuth, productController.deleteProduct);
+
 module.exports = router;

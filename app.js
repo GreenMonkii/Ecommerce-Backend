@@ -10,6 +10,7 @@ const cors = require("cors");
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 const productRouter = require("./routes/product");
+const cartRouter = require("./routes/cart");
 const requireAuth = require("./middleware/auth");
 
 require("dotenv").config();
@@ -17,10 +18,14 @@ const app = express();
 const PORT = 8080;
 
 // Connecting to the MongoDB database
-const dbURI = process.env.MONGODB_URI;
+const dbURI =
+  process.env.NODE_ENV === "test"
+    ? process.env.TESTDB_URI
+    : process.env.MONGODB_URI;
+    
 mongoose
   .connect(dbURI)
-  .then((result) => {
+  .then((res) => {
     // Listen for Requests
     app.listen(PORT, () =>
       console.log(`The server is running on http://localhost:${PORT}`)
@@ -50,6 +55,7 @@ app.use(cors());
 
 app.use("/users", usersRouter);
 app.use("/products", productRouter);
+app.use("/cart", cartRouter);
 app.use("/", indexRouter, requireAuth);
 
 // catch 404 and forward to error handler

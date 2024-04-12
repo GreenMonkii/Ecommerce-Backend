@@ -1,6 +1,10 @@
 const User = require("../models/user");
 
 const loginUser = (req, res) => {
+  if (!req.body.email || !req.body.password) {
+    return res.status(400).send({ message: "All fields are required." });
+  }
+  
   User.findOne({ email: req.body.email })
   .then((user) => {
     if (user === null) {
@@ -15,7 +19,7 @@ const loginUser = (req, res) => {
         });
       } else {
         return res.status(400).send({
-          message: "Wrong Password",
+          message: "Invalid Password",
         });
       }
     }
@@ -23,6 +27,10 @@ const loginUser = (req, res) => {
 };
 
 const createUser = (req, res, next) => {
+  if (!req.body.username || !req.body.email || !req.body.password) {
+    return res.status(400).send({ message: "All fields are required." });
+  }
+
   let newUser = new User();
   newUser.username = req.body.username;
   newUser.email = req.body.email;
@@ -43,6 +51,11 @@ const createUser = (req, res, next) => {
     });
 };
 
+const changePassword = (req, res, next) => {
+  let user = User.findById(req.session.userId);
+  user.setPassword(req.body.newPassword);
+};
+
 const addOrderHistory = (req, res, next) => {
   let user = User.findById(req.session.userId);
   user.orderHistory.push(req.body);
@@ -51,5 +64,6 @@ const addOrderHistory = (req, res, next) => {
 module.exports = {
   loginUser,
   createUser,
+  changePassword,
   addOrderHistory,
 };
