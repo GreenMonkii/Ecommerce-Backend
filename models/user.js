@@ -39,6 +39,10 @@ const userSchema = new Schema(
   { timestamps: true }
 );
 
+userSchema.methods.generateUserName = function () {
+  this.username = this.email.split("@")[0];
+};
+
 userSchema.methods.setPassword = function (password) {
   this.salt = crypto.randomBytes(16).toString("hex");
   this.hash = crypto

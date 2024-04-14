@@ -4,7 +4,7 @@ const User = require("../models/user");
 async function getCart(req, res, next) {
   let cart;
   try {
-    const user = await User.findById(req.session.userId);
+    const user = await User.findById(req.user);
     cart = await Cart.findById(user.shoppingCart);
     if (cart == null) {
       return res.status(404).json({ message: "Cannot find Cart" });

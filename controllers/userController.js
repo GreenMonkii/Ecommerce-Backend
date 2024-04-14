@@ -1,22 +1,23 @@
 const User = require("../models/user");
+const jwt = require("jsonwebtoken");
 
 const loginUser = (req, res) => {
   if (!req.body.email || !req.body.password) {
     return res.status(400).send({ message: "All fields are required." });
   }
-  
-  User.findOne({ email: req.body.email })
-  .then((user) => {
+
+  User.findOne({ email: req.body.email }).then((user) => {
     if (user === null) {
       return res.status(400).send({
         message: "User not found.",
       });
     } else {
       if (user.validPassword(req.body.password)) {
-        req.session.userId = user._id.toString();
-        return res.status(201).send({
-          message: "User Logged In",
+        req.user = user._id;
+        const token = jwt.sign({ id: user._id }, process.env.SECRET_KEY, {
+          expiresIn: "1d",
         });
+        return res.status(201).send({ token: token });
       } else {
         return res.status(400).send({
           message: "Invalid Password",
@@ -26,22 +27,25 @@ const loginUser = (req, res) => {
   });
 };
 
-const createUser = (req, res, next) => {
-  if (!req.body.username || !req.body.email || !req.body.password) {
+const createUser = (req, res, _next) => {
+  if (!req.body.email || !req.body.password) {
     return res.status(400).send({ message: "All fields are required." });
   }
 
   let newUser = new User();
-  newUser.username = req.body.username;
   newUser.email = req.body.email;
   newUser.setPassword(req.body.password);
+  newUser.generateUserName();
 
   newUser
     .save()
     .then((result) => {
-      req.session.userId = result._id;
+      req.user = result._id;
+      const token = jwt.sign({ id: result._id }, process.env.SECRET_KEY, {
+        expiresIn: "1d",
+      });
       res.statusCode = 201;
-      res.json({ message: "User Created Successfully" });
+      return res.send({ token: token });
     })
     .catch((err) => {
       console.log(err);
@@ -52,12 +56,12 @@ const createUser = (req, res, next) => {
 };
 
 const changePassword = (req, res, next) => {
-  let user = User.findById(req.session.userId);
+  let user = User.findById(req.user);
   user.setPassword(req.body.newPassword);
 };
 
 const addOrderHistory = (req, res, next) => {
-  let user = User.findById(req.session.userId);
+  let user = User.findById(req.user);
   user.orderHistory.push(req.body);
 };
 

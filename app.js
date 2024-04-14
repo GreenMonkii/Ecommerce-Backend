@@ -4,7 +4,6 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
 const logger = require("morgan");
-const session = require("express-session");
 const cors = require("cors");
 
 const indexRouter = require("./routes/index");
@@ -25,7 +24,7 @@ const dbURI =
     
 mongoose
   .connect(dbURI)
-  .then((res) => {
+  .then((_res) => {
     // Listen for Requests
     app.listen(PORT, () =>
       console.log(`The server is running on http://localhost:${PORT}`)
@@ -43,14 +42,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
-app.use(
-  session({
-    secret: process.env.SECRET_KEY,
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: false, maxAge: 86400000 },
-  })
-);
 app.use(cors());
 
 app.use("/users", usersRouter);

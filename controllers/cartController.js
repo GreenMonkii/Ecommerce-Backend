@@ -16,7 +16,8 @@ const addItemToCart = async (req, res, _next) => {
     if (!product) {
       throw new Error("Product does not exist");
     }
-    const user = await User.findById(req.session.userId);
+    const user = await User.findById(req.user);
+    console.log(user);
     const userCart = await Cart.findById(user.shoppingCart);
     userCart.items.push(cartItem);
     await userCart.save();
@@ -31,7 +32,7 @@ const addItemToCart = async (req, res, _next) => {
 const removeItemFromCart = async (req, res, _next) => {
   try {
     const cartItemID = req.body.cartItemID;
-    const user = await User.findById(req.session.userId);
+    const user = await User.findById(req.user);
     const userCart = await Cart.findById(user.shoppingCart);
     userCart.items = userCart.items.filter(
       (cartItem) => cartItem._id !== cartItemID

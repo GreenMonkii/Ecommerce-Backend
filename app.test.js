@@ -15,9 +15,8 @@ async function userLogin() {
     password: process.env.PASSWORD,
   });
 
-  // Extract session cookie for subsequent requests
-  const cookies = loginRes.headers["set-cookie"];
-  return cookies;
+  const token = loginRes.body.token;
+  return token;
 }
 
 const dummyProduct = {
@@ -93,7 +92,7 @@ describe("Create A New User", () => {
     });
     await createDummyCart("johndoe@foo.com");
     expect(res.statusCode).toBe(201);
-    expect(res.body.message).toBe("User Created Successfully");
+    expect(res.body).toHaveProperty("token");
   });
 
   it("should return a 400 status code for missing fields", async () => {
@@ -116,7 +115,7 @@ describe("Login A User", () => {
 
     // Check if login was successful
     expect(loginRes.statusCode).toBe(201);
-    expect(loginRes.body.message).toBe("User Logged In");
+    expect(loginRes.body).toHaveProperty("token");
   });
 
   it("should return a 400 status code for an invalid password", async () => {
@@ -189,24 +188,24 @@ describe("GET /products/:productId", () => {
 });
 
 describe("POST /products/create", () => {
-  it("should return a 400 response code for an unauthenticated user", async () => {
+  it("should return a 401 response code for an unauthenticated user", async () => {
     const res = await request(app).post("/products/create");
-    expect(res.statusCode).toBe(400);
+    expect(res.statusCode).toBe(401);
     expect(res.body).toEqual(
       expect.objectContaining({
-        message: "User is not authenticated.",
+        message: "Access denied",
       })
     );
   });
 
   it("should return a 201 response code for an authenticated user", async () => {
     // Login as the user
-    const cookies = await userLogin();
+    const token = await userLogin();
 
     // Create product after successful login
     const res = await request(app)
       .post("/products/create")
-      .set("Cookie", cookies) // Attach session cookie
+      .set("Authorization", token) // Attach session cookie
       .send(dummyProduct2);
 
     // Check if product creation was successful
@@ -220,16 +219,17 @@ describe("POST /products/create", () => {
 // CART TESTS
 describe("POST /cart/add", () => {
   it("should return a 201 response code for an authenticated user", async () => {
-    const cookies = await userLogin();
+    const token = await userLogin();
     // Create a dummy product
     await request(app)
       .post("/products/create")
-      .set("Cookie", cookies) // Attach session cookie
+      .set("Authorization", token) // Attach session cookie
       .send(dummyProduct2);
 
+    console.log("Successfully created product!");
     const response = await request(app)
       .post("/cart/add")
-      .set("Cookie", cookies)
+      .set("Authorization", token)
       .send({ product: id, quantity: 1 });
     // expect(response.statusCode).toBe(201);
     expect(response.body.message).toBe(
@@ -237,62 +237,62 @@ describe("POST /cart/add", () => {
     );
   });
 
-  it("should return a 400 response code for an unauthenticated user", async () => {
+  it("should return a 401 response code for an unauthenticated user", async () => {
     const res = await request(app).post("/cart/add");
-    expect(res.statusCode).toBe(400);
+    expect(res.statusCode).toBe(401);
     expect(res.body).toEqual(
       expect.objectContaining({
-        message: "User is not authenticated.",
+        message: "Access denied",
       })
     );
   });
 
   it("should return a 400 response code for an invalid product", async () => {
-    const cookies = await userLogin();
+    const token = await userLogin();
     const fakeId = new mongoose.Types.ObjectId();
     const response = await request(app)
       .post("/cart/add")
-      .set("Cookie", cookies)
+      .set("Authorization", token)
       .send({ product: fakeId, quantity: 1 });
     expect(response.statusCode).toBe(400);
     expect(response.body.message).toBe("Product does not exist");
   });
 
   it("should return a 400 response code for an invalid quantity", async () => {
-    const cookies = await userLogin();
+    const token = await userLogin();
     const response = await request(app)
       .post("/cart/add")
-      .set("Cookie", cookies)
+      .set("Authorization", token)
       .send({ product: id, quantity: -1 });
     expect(response.statusCode).toBe(400);
   });
 
   it("should return a 400 response code for missing product and quantity", async () => {
-    const cookies = await userLogin();
+    const token = await userLogin();
     const response = await request(app)
       .post("/cart/add")
-      .set("Cookie", cookies)
+      .set("Authorization", token)
       .send({});
     expect(response.statusCode).toBe(400);
     expect(response.body.message).toBe("Product and quantity are required");
   });
 
   it("should return a 400 response code for missing product", async () => {
-    const cookies = await userLogin();
+    const token = await userLogin();
     const response = await request(app)
       .post("/cart/add")
-      .set("Cookie", cookies)
+      .set("Authorization", token)
       .send({ quantity: 1 });
     expect(response.statusCode).toBe(400);
     expect(response.body.message).toBe("Product and quantity are required");
   });
 
   it("should return a 400 response code for missing quantity", async () => {
-    const cookies = await userLogin();
+    const token = await userLogin();
     const fakeId = new mongoose.Types.ObjectId();
     const response = await request(app)
       .post("/cart/add")
-      .set("Cookie", cookies)
+      .set("Authorization", token)
       .send({ product: fakeId });
     expect(response.statusCode).toBe(400);
     expect(response.body.message).toBe("Product and quantity are required");
@@ -301,14 +301,14 @@ describe("POST /cart/add", () => {
 
 describe("POST /cart/remove", () => {
   it("should return a 201 status code for an authenticated user", async () => {
-    const cookies = await userLogin();
-    const res = await request(app).get("/cart").set("Cookie", cookies).send();
+    const token = await userLogin();
+    const res = await request(app).get("/cart").set("Authorization", token).send();
     const cart = await res.body;
     console.log(cart);
     const firstCartItem = cart.items[0];
     const response = await request(app)
       .post("/cart/remove")
-      .set("Cookie", cookies)
+      .set("Authorization", token)
       .send({ cartItemID: firstCartItem._id });
     // expect(response.statusCode).toBe(201);
     expect(response.body.message).toBe(
@@ -318,7 +318,7 @@ describe("POST /cart/remove", () => {
 
   it("should return a 400 status code for an unauthenticated user", async () => {
     const response = await request(app).post("/cart/remove");
-    expect(response.statusCode).toBe(400);
-    expect(response.body.message).toBe("User is not authenticated.");
+    expect(response.statusCode).toBe(401);
+    expect(response.body.message).toBe("Access denied");
   });
 });
