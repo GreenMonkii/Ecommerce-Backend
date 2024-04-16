@@ -17,8 +17,18 @@ const addItemToCart = async (req, res, _next) => {
       throw new Error("Product does not exist");
     }
     const user = await User.findById(req.user);
-    console.log(user);
-    const userCart = await Cart.findById(user.shoppingCart);
+    let userCart = await Cart.findById(user.shoppingCart);
+    
+    // Check for a user without an attached shopping cart
+    if (!userCart) {
+      userCart = new Cart({
+        items: [],
+      });
+      await userCart.save();
+      user.shoppingCart = cart._id;
+      user.save();
+    }
+
     userCart.items.push(cartItem);
     await userCart.save();
     res

@@ -32,32 +32,57 @@ const createUser = (req, res, _next) => {
     return res.status(400).send({ message: "All fields are required." });
   }
 
-  let newUser = new User();
-  newUser.email = req.body.email;
-  newUser.setPassword(req.body.password);
-  newUser.generateUserName();
-
-  newUser
-    .save()
-    .then((result) => {
-      req.user = result._id;
-      const token = jwt.sign({ id: result._id }, process.env.SECRET_KEY, {
-        expiresIn: "1d",
+  // Check if user already exists
+  User.findOne({ email: req.body.email }).then((user) => {
+    if (user !== null) {
+      return res.status(400).send({
+        message: "User already exists.",
       });
-      res.statusCode = 201;
-      return res.send({ token: token });
-    })
-    .catch((err) => {
-      console.log(err);
-      return res
-        .status(400)
-        .send({ message: "An error occured while creating a User!" });
-    });
+    } else {
+      // Create a new user
+      let newUser = new User();
+      newUser.email = req.body.email;
+      newUser.setPassword(req.body.password);
+      newUser.generateUserName();
+
+      newUser
+        .save()
+        .then((result) => {
+          req.user = result._id;
+          const token = jwt.sign({ id: result._id }, process.env.SECRET_KEY, {
+            expiresIn: "1d",
+          });
+          res.statusCode = 201;
+          return res.send({ token: token });
+        })
+        .catch((err) => {
+          console.log(err);
+          return res
+            .status(400)
+            .send({ message: "An error occured while creating a User!" });
+        });
+    }
+  });
 };
 
 const changePassword = (req, res, next) => {
-  let user = User.findById(req.user);
-  user.setPassword(req.body.newPassword);
+  User.findById(req.user).then((user) => {
+    user.setPassword(req.body.newPassword);
+  });
+};
+
+const getUserInfo = (req, res, next) => {
+  try {
+    User.findById(req.user).then((user) => {
+      const { salt, hash, ...rest } = user._doc;
+      res.status(200).send(rest);
+    });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(400)
+      .send({ message: "An error occured while fetching user info!" });
+  }
 };
 
 const addOrderHistory = (req, res, next) => {
@@ -65,9 +90,16 @@ const addOrderHistory = (req, res, next) => {
   user.orderHistory.push(req.body);
 };
 
+const getOrderHistory = (req, res, next) => {
+  let user = User.findById(req.user);
+  return res.send(user.orderHistory);
+};
+
 module.exports = {
   loginUser,
   createUser,
   changePassword,
   addOrderHistory,
+  getUserInfo,
+  getOrderHistory,
 };

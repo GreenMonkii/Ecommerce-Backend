@@ -86,7 +86,6 @@ describe("App", () => {
 describe("Create A New User", () => {
   it("should return a 201 status code", async () => {
     const res = await request(app).post("/users/signup").send({
-      username: "John",
       email: "johndoe@foo.com",
       password: process.env.PASSWORD,
     });
@@ -103,6 +102,16 @@ describe("Create A New User", () => {
     });
     expect(res.statusCode).toBe(400);
     expect(res.body.message).toBe("All fields are required.");
+  });
+
+  it("should return a 400 status code for an existing user", async () => {
+    const res = await request(app).post("/users/signup").send({
+      username: "John",
+      email: "johndoe@foo.com",
+      password: process.env.PASSWORD,
+    });
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toBe("User already exists.");
   });
 });
 
@@ -147,6 +156,25 @@ describe("Login A User", () => {
     });
     expect(loginRes.statusCode).toBe(400);
     expect(loginRes.body.message).toBe("All fields are required.");
+  });
+});
+
+describe("Get User Info", () => {
+  it("should return a 401 status code for an unauthenticated user", async () => {
+    const res = await request(app).get("/users/me");
+    expect(res.statusCode).toBe(401);
+    expect(res.body.message).toBe("Access denied");
+  });
+
+  it("should return a 200 status code for an authenticated user", async () => {
+    const token = await userLogin();
+    const res = await request(app)
+      .get("/users/me")
+      .set("Authorization", token)
+      .send();
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty("email");
+    expect(res.body).not.toHaveProperty("salt");
   });
 });
 
@@ -205,7 +233,7 @@ describe("POST /products/create", () => {
     // Create product after successful login
     const res = await request(app)
       .post("/products/create")
-      .set("Authorization", token) // Attach session cookie
+      .set("Authorization", token) // Attach authorization header
       .send(dummyProduct2);
 
     // Check if product creation was successful
@@ -223,10 +251,9 @@ describe("POST /cart/add", () => {
     // Create a dummy product
     await request(app)
       .post("/products/create")
-      .set("Authorization", token) // Attach session cookie
+      .set("Authorization", token) // Attach authorization header
       .send(dummyProduct2);
 
-    console.log("Successfully created product!");
     const response = await request(app)
       .post("/cart/add")
       .set("Authorization", token)
@@ -302,9 +329,11 @@ describe("POST /cart/add", () => {
 describe("POST /cart/remove", () => {
   it("should return a 201 status code for an authenticated user", async () => {
     const token = await userLogin();
-    const res = await request(app).get("/cart").set("Authorization", token).send();
+    const res = await request(app)
+      .get("/cart")
+      .set("Authorization", token)
+      .send();
     const cart = await res.body;
-    console.log(cart);
     const firstCartItem = cart.items[0];
     const response = await request(app)
       .post("/cart/remove")
