@@ -25,7 +25,7 @@ const addItemToCart = async (req, res, _next) => {
         items: [],
       });
       await userCart.save();
-      user.shoppingCart = cart._id;
+      user.shoppingCart = userCart._id;
       user.save();
     }
 

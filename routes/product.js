@@ -1,12 +1,20 @@
 const express = require("express");
 const router = express.Router();
+const apicache = require("apicache");
 const { getProduct } = require("../middleware/product");
 const productController = require("../controllers/productController");
 const requireAuth = require("../middleware/auth");
 
-router.get("/", productController.listProducts);
+const cache = apicache.middleware;
 
-router.get("/:productId", getProduct, productController.getProductById);
+router.get("/", cache("30 minutes"), productController.listProducts);
+
+router.get(
+  "/:productId",
+  cache("30 minutes"),
+  getProduct,
+  productController.getProductById
+);
 
 router.post("/create", requireAuth, productController.createProduct);
 

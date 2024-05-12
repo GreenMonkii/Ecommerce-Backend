@@ -14,7 +14,7 @@ const requireAuth = require("./middleware/auth");
 
 require("dotenv").config();
 const app = express();
-const PORT = 8080;
+const PORT = process.env.NODE_ENV === "test" ? 3001 : process.env.PORT || 8080;
 
 // Connecting to the MongoDB database
 const dbURI =
