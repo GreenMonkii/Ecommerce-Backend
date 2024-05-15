@@ -21,7 +21,14 @@ const dbURI =
   process.env.NODE_ENV === "test"
     ? process.env.TESTDB_URI
     : process.env.MONGODB_URI;
-    
+
+const corsOptions = {
+  origin: "http://localhost:3000",
+  credentials: true,
+  optionsSuccessStatus: 200,
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
 mongoose
   .connect(dbURI)
   .then((_res) => {
@@ -42,7 +49,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
-app.use(cors());
+app.use(cors(corsOptions));
 
 app.use("/users", usersRouter);
 app.use("/products", productRouter);

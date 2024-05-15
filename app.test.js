@@ -159,6 +159,24 @@ describe("Login A User", () => {
   });
 });
 
+describe("Validate Token", () => {
+  it("should return a 401 status code for an invalid token", async () => {
+    const res = await request(app).get("/users/validate");
+    expect(res.statusCode).toBe(401);
+    expect(res.body.message).toBe("Access denied");
+  });
+
+  it("should return a 200 status code for a valid token", async () => {
+    const token = await userLogin();
+    const res = await request(app)
+      .get("/users/validate")
+      .set("Authorization", token)
+      .send();
+    expect(res.statusCode).toBe(200);
+    expect(res.body.message).toBe("Token is valid");
+  });
+});
+
 describe("Get User Info", () => {
   it("should return a 401 status code for an unauthenticated user", async () => {
     const res = await request(app).get("/users/me");

@@ -65,13 +65,17 @@ const createUser = (req, res, _next) => {
   });
 };
 
-const changePassword = (req, res, next) => {
+const changePassword = (req, _res, _next) => {
   User.findById(req.user).then((user) => {
     user.setPassword(req.body.newPassword);
   });
 };
 
-const getUserInfo = (req, res, next) => {
+const validateToken = (_req, res, _next) => {
+  res.status(200).send({ message: "Token is valid" });
+};
+
+const getUserInfo = (req, res, _next) => {
   try {
     User.findById(req.user).then((user) => {
       const { salt, hash, ...rest } = user._doc;
@@ -85,12 +89,12 @@ const getUserInfo = (req, res, next) => {
   }
 };
 
-const addOrderHistory = (req, res, next) => {
+const addOrderHistory = (req, _res, _next) => {
   let user = User.findById(req.user);
   user.orderHistory.push(req.body);
 };
 
-const getOrderHistory = (req, res, next) => {
+const getOrderHistory = (req, res, _next) => {
   let user = User.findById(req.user);
   return res.send(user.orderHistory);
 };
@@ -102,4 +106,5 @@ module.exports = {
   addOrderHistory,
   getUserInfo,
   getOrderHistory,
+  validateToken,
 };

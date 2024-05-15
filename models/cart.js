@@ -14,10 +14,6 @@ const cartItemSchema = new mongoose.Schema({
   },
 });
 
-cartItemSchema.virtual("price").get(function () {
-  return this.product.Price;
-});
-
 const shoppingCartSchema = new mongoose.Schema({
   items: [cartItemSchema],
 });

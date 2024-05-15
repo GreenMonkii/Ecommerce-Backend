@@ -5,6 +5,7 @@ const requireAuth = require("../middleware/auth");
 
 router.post("/signup", userController.createUser);
 router.get("/me", requireAuth, userController.getUserInfo);
+router.get("/validate", requireAuth, userController.validateToken);
 router.post("/login", userController.loginUser);
 router.post("/add-order-history", requireAuth, userController.addOrderHistory);
 router.get("/get-order-history", requireAuth, userController.getOrderHistory);

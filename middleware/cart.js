@@ -5,7 +5,10 @@ async function getCart(req, res, next) {
   let cart;
   try {
     const user = await User.findById(req.user);
-    cart = await Cart.findById(user.shoppingCart);
+    cart = await Cart.findById(user.shoppingCart).populate({
+      path: "items.product",
+      select: "Price Name -_id",
+    });
     if (cart == null) {
       return res.status(404).json({ message: "Cannot find Cart" });
     }
