@@ -30,7 +30,7 @@ const corsOptions = {
 };
 
 mongoose
-  .connect(dbURI)
+  .connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then((_res) => {
     // Listen for Requests
     app.listen(PORT, () =>

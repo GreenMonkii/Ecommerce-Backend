@@ -1,0 +1,8 @@
+{
+    "appService.zipIgnorePattern": [
+        "node_modules{,/**}",
+        ".vscode{,/**}"
+    ],
+    "appService.defaultWebAppToDeploy": "/subscriptions/bd5b468f-72e6-4d1f-b139-7bcd6e65c627/resourceGroups/GreenMonkii-Buzzmart/providers/Microsoft.Web/sites/GreenMonkii-Buzzmart-Backend",
+    "appService.deploySubpath": "."
+}
