@@ -21,8 +21,10 @@ const PORT = process.env.NODE_ENV === "test" ? 3001 : process.env.PORT || 8080;
 // Connecting to the MongoDB database
 const dbURI =
   process.env.NODE_ENV === "test"
-    ? process.env.TESTDB_URI
-    : process.env.MONGODB_URI;
+    ? process.env.TEST_DB_URI
+    : process.env.NODE_ENV === "production"
+    ? process.env.PRODUCTION_DB_URI
+    : process.env.DEV_DB_URI;
 
 const corsOptions = {
   origin: "http://localhost:3000",
@@ -32,15 +34,11 @@ const corsOptions = {
 };
 
 mongoose
-  .connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(dbURI)
   .then((_res) => {
     // Listen for Requests
     app.listen(PORT, () => {
-      const protocol = req.protocol;
-      const hostname = req.hostname;
-      const port = req.port;
-      const serverUrl = `${protocol}://${hostname}:${port}`;
-      console.log(`Server running at ${serverUrl}`);
+      console.log(`Server running at http://localhost:${PORT}`);
     });
     console.log("Connected to Database");
   })

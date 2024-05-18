@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const crypto = require("crypto");
+const { Cart } = require("./cart");
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema(
@@ -58,6 +59,19 @@ userSchema.methods.validPassword = function (password) {
     return this.hash === hash;
   } catch (err) {
     throw new Error("Invalid Password");
+  }
+};
+
+userSchema.methods.createCart = function () {
+  try {
+    const userCart = new Cart({
+      items: [],
+    });
+    userCart.save().then((cart) => {
+      this.shoppingCart = cart._id;
+    });
+  } catch (err) {
+    throw new Error("Cart could not be created");
   }
 };
 

@@ -44,6 +44,7 @@ const createUser = (req, res, _next) => {
       newUser.email = req.body.email;
       newUser.setPassword(req.body.password);
       newUser.generateUserName();
+      newUser.createCart();
 
       newUser
         .save()
