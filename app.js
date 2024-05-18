@@ -33,9 +33,13 @@ mongoose
   .connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then((_res) => {
     // Listen for Requests
-    app.listen(PORT, () =>
-      console.log(`The server is running on http://localhost:${PORT}`)
-    );
+    app.listen(PORT, () => {
+      const protocol = req.protocol;
+      const hostname = req.hostname;
+      const port = req.port;
+      const serverUrl = `${protocol}://${hostname}:${port}`;
+      console.log(`Server running at ${serverUrl}`);
+    });
     console.log("Connected to Database");
   })
   .catch((err) => console.log(err));

@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node app.js",
     "dev": "cross-env NODE_ENV=dev nodemon app.js",
-    "test": "cross-env NODE_ENV=test jest --watchAll"
+    "test": "cross-env NODE_ENV=test jest --watchAll --detectOpenHandles"
   },
   "dependencies": {
     "apicache": "^1.6.3",
@@ -27,6 +27,6 @@
     "cross-env": "^7.0.3"
   },
   "engines": {
-    "node": "21.x"
+    "node": ">=20.x"
   }
 }

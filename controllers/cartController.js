@@ -8,9 +8,7 @@ const getCartItems = (_req, res, _next) => {
 
 const addItemToCart = async (req, res, _next) => {
   try {
-    console.log("Adding item to cart");
     const cartItem = req.body;
-    console.log(cartItem);
     if (!cartItem.product || !cartItem.quantity) {
       throw new Error("Product and quantity are required");
     }
