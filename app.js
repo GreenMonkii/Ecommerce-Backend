@@ -5,6 +5,8 @@ const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
 const logger = require("morgan");
 const cors = require("cors");
+const compression = require("compression");
+const helmet = require("helmet");
 
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
@@ -52,6 +54,19 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(compression());
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "https://code.jquery.com/"],
+      styleSrc: ["'self'", "https://stackpath.bootstrapcdn.com/"],
+      imgSrc: ["'self'", "https://via.placeholder.com/"],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'", "https://stackpath.bootstrapcdn.com/"],
+    },
+  })
+);
 app.use(express.static(path.join(__dirname, "public")));
 app.use(cors(corsOptions));
 
