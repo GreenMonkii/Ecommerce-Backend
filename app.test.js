@@ -65,7 +65,7 @@ async function createDummyProduct() {
 }
 
 beforeAll(async () => {
-  await mongoose.connect(process.env.TESTDB_URI);
+  await mongoose.connect(process.env.TEST_DB_URI);
   await User.createCollection();
   await Product.createCollection();
   await createDummyProduct();
@@ -78,7 +78,7 @@ afterAll(async () => {
 
 describe("App", () => {
   it("should have a valid dbURI", () => {
-    expect(process.env.TESTDB_URI).toBeDefined();
+    expect(process.env.TEST_DB_URI).toBeDefined();
   });
 });
 
@@ -259,6 +259,53 @@ describe("POST /products/create", () => {
     expect(res.body).toEqual({
       message: "Product Created Successfully",
     });
+  });
+});
+
+describe("POST /products/:productId/reviews", () => {
+  it("should return a 401 response code for an unauthenticated user", async () => {
+    const res = await request(app).post(`/products/${id}/reviews`);
+    expect(res.statusCode).toBe(401);
+    expect(res.body).toEqual(
+      expect.objectContaining({
+        message: "Access denied",
+      })
+    );
+  });
+
+  it("should return a 400 response code for an invalid product", async () => {
+    const token = await userLogin();
+    const fakeId = new mongoose.Types.ObjectId();
+    const response = await request(app)
+      .post(`/products/${fakeId}/reviews`)
+      .set("Authorization", token)
+      .send({ rating: 5, comment: "Great product!" });
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toBe("Product does not exist");
+  });
+
+  it("should return a 400 response code for missing fields", async () => {
+    const token = await userLogin();
+    const response = await request(app)
+      .post(`/products/${id}/reviews`)
+      .set("Authorization", token)
+      .send({ rating: 5 });
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toBe(
+      "Product, rating, and comment are required"
+    );
+  });
+
+  it("should return a 201 response code for an authenticated user", async () => {
+    const token = await userLogin();
+    const response = await request(app)
+      .post(`/products/${id}/reviews`)
+      .set("Authorization", token)
+      .send({ rating: 5, comment: "Great product!" });
+    expect(response.statusCode).toBe(201);
+    expect(response.body.message).toBe(
+      "Review has been successfully added to the product"
+    );
   });
 });
 

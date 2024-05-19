@@ -57,7 +57,6 @@ const createUser = (req, res, _next) => {
           return res.send({ token: token });
         })
         .catch((err) => {
-          console.log(err);
           return res
             .status(400)
             .send({ message: "An error occured while creating a User!" });
@@ -83,7 +82,6 @@ const getUserInfo = (req, res, _next) => {
       res.status(200).send(rest);
     });
   } catch (error) {
-    console.log(error);
     res
       .status(400)
       .send({ message: "An error occured while fetching user info!" });

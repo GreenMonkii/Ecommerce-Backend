@@ -3,6 +3,7 @@ const router = express.Router();
 const apicache = require("apicache");
 const { getProduct } = require("../middleware/product");
 const productController = require("../controllers/productController");
+const reviewController = require("../controllers/reviewController");
 const requireAuth = require("../middleware/auth");
 
 const cache = apicache.middleware;
@@ -26,5 +27,7 @@ router.put("/:productId", requireAuth, productController.replaceProduct);
 
 // DELETE a product
 router.delete("/:productId", requireAuth, productController.deleteProduct);
+
+router.post("/:productId/reviews", requireAuth, reviewController.addReview);
 
 module.exports = router;

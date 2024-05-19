@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const { reviewSchema } = require("./reviews");
 
 const productSchema = new Schema(
   {
@@ -31,13 +32,18 @@ const productSchema = new Schema(
     Stock: {
       type: Number,
       required: true,
-      default: 1
+      default: 1,
     },
     Ratings: {
       type: [Number],
-      required: false
+      required: false,
     },
-    Keywords: [String]
+    Reviews: {
+      type: [reviewSchema],
+      ref: "Review",
+      required: false,
+    },
+    Keywords: [String],
   },
   { timestamps: true }
 );

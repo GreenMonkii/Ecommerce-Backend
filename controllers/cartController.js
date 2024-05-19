@@ -39,12 +39,10 @@ const removeItemFromCart = async (req, res, _next) => {
     const cartItemID = req.body.cartItemID;
     const user = await User.findById(req.user);
     const userCart = await Cart.findById(user.shoppingCart);
-    console.log("Length Before Deleting", userCart.items.length);
     userCart.items = userCart.items.filter(
       (cartItem) => cartItem._id.toString() !== cartItemID
     );
     await userCart.save();
-    console.log("Length After Deleting", userCart.items.length);
     res
       .status(201)
       .json({ message: "Item has been successfully removed from the cart" });
